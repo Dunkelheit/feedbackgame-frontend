@@ -1,6 +1,6 @@
-# feedbackapp-web
+# feedbackgame-frontend
 
-> A Vue.js project
+> A frontend for the Feedback Game
 
 ## Build Setup
 
