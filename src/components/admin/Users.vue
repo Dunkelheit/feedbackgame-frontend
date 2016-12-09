@@ -58,7 +58,7 @@ export default {
             this.error = null;
             this.users = [];
             this.loading = true;
-            axios.get('/api/admin/users', {
+            axios.get('/api/users', {
                 headers: {
                     'x-auth-token': this.$store.state.loggedIn
                 }

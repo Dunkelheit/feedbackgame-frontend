@@ -51,7 +51,7 @@ export default {
             this.review = null;
             this.cards = [];
             this.loading = true;
-            axios.get('/api/admin/cards', {
+            axios.get('/api/cards', {
                 headers: {
                     'x-auth-token': this.$store.state.loggedIn
                 }
