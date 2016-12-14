@@ -3,6 +3,8 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
+document.body.className = localStorage.feedbackAppToken ? 'logged-in' : 'logged-out';
+
 export default new Vuex.Store({
     state: {
         loggedIn: localStorage.feedbackAppToken,

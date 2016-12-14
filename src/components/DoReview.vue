@@ -11,7 +11,6 @@
         </div>
 
         <div class="content cards">
-
             <div class="card-container" v-for="card in cards">
                 <div class="card">
                     <div class="front">
