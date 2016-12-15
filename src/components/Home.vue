@@ -58,6 +58,7 @@ export default {
                 });
                 localStorage.feedbackAppToken = token;
                 localStorage.feedbackAppRole = role;
+                localStorage.feedbackAppUser = JSON.stringify(response.data);
                 document.body.className = 'logged-in';
                 this.username = '';
                 this.password = '';

@@ -30,7 +30,7 @@
 import axios from 'axios';
 export default {
     name: 'reviews',
-    data () {
+    data() {
         return {
             loading: false,
             review: null,
