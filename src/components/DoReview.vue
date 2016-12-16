@@ -77,6 +77,10 @@ export default {
     },
     methods: {
         submitForm() {
+            if (!this.card1 && !this.card2 && !this.card3) {
+                alert('Please choose three cards');
+                return;
+            }
             axios.put('/api/reviews/' + this.$route.params.id, {
                 cards: [{
                     id: parseInt(this.card1, 10)
