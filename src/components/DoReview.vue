@@ -11,13 +11,28 @@
             You can give it a comment by clicking the "i" on the card.
         </p>
         <div v-if="review" class="recipient">
-            <div class="profile-container">
-                <div class="pica" v-bind:style="'background-image: url(/static/img/' + review.reviewee.avatar + ');'"><span>Pica of {{ review.reviewee.firstName }}</span></div>
-                <ul>
-                    <li class="full-name">{{ review.reviewee.fullName }}</li>
-                    <li class="job-title">{{ review.reviewee.jobTitle }}</li>
-                    <li class="email">{{ review.reviewee.email }}</li>
-                </ul>
+            <div class="row profile-container">
+                <div class="col-md-6">
+                    <div class="pica" v-bind:style="'background-image: url(/static/img/' + review.reviewee.avatar + ');'"><span>Pica of {{ review.reviewee.firstName }}</span></div>
+                    <ul>
+                        <li class="full-name">{{ review.reviewee.fullName }}</li>
+                        <li class="job-title">{{ review.reviewee.jobTitle }}</li>
+                        <li class="email">{{ review.reviewee.email }}</li>
+                    </ul>
+                    <div class="button-container">
+                        <button class="btn btn-default" type="submit">Cancel</button>
+                        <button class="btn btn-success" type="submit">Send</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card-recipient positive"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card-recipient positive"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card-recipient negative"></div>
+                </div>
             </div>
         </div>
         <div v-for="row in chunkedCards" class="row cards">
@@ -111,15 +126,50 @@ export default {
 }
 .recipient .profile-container {
     padding-top: 20px;
-    margin-left: 20px;
 }
 .recipient .pica {
+    margin-left: 20px;
     float: none;
 }
 .recipient .profile-container ul {
+    margin-left: 20px !important;
     margin-top: 5px;
     margin-left: 0;
     padding-left: 0;
+}
+.button-container {
+    margin-left: 25px;
+    margin-top: 25px;
+}
+.button-container .btn {
+    -webkit-box-shadow: -4px 4px 0px 0px #393939;
+    -moz-box-shadow:    -4px 4px 0px 0px #393939;
+    box-shadow:         -4px 4px 0px 0px #393939;
+    border: 0;
+    color: #393939;
+    border-radius: 0;
+    font-family: 'gotham-bold';
+    font-size: 14px;
+}
+.button-container .btn-default {
+    background-color: #FFFFFF;
+}
+.button-container .btn-success {
+    background-color: #FEE19E;
+    margin-left: 2px;
+}
+
+.card-recipient {
+    width: 140px;
+    height: 203px;
+    border-style: dashed;
+    border-width: 2px;
+}
+.card-recipient.positive {
+    border-color: #9fdaf1;
+}
+.card-recipient.negative {
+    border-color: #ffe65d;
 }
 .caption {
     font-size: 14px;
@@ -129,10 +179,10 @@ export default {
 .card p {
     color: #000000;
 }
-.positive {
+.card.positive {
     background-color: #9fdaf1;
 }
-.negative {
+.card.negative {
     background-color: #ffe65d;
 }
 .card-icon {
