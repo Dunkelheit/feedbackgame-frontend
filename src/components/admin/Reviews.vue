@@ -14,15 +14,13 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>UUID</th>
                         <th>Who reviews who</th>
                         <th>Completed</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="review in reviews">
-                        <td><a href="#">{{review.uuid}}</a></td>
-                        <td><strong>{{review.reviewer.fullName}}</strong> reviews <strong>{{review.reviewee.fullName}}</strong></td>
+                        <td><a href="#" v-on:click="loadReview(review.id, $event)"><strong>{{review.reviewer.fullName}}</strong> reviews <strong>{{review.reviewee.fullName}}</strong></a></td>
                         <td>{{review.completed ? 'Yes' : 'No'}}</td>
                     </tr>
                 </tbody>
@@ -33,22 +31,27 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">{{ review.id ? 'Update' : 'Create' }} review</h4>
+                        <h4 class="modal-title">{{ review.id ? (review.completed ? 'See' : 'Update') : 'Create' }} review</h4>
                     </div>
                     <form v-on:submit="createReview">
                         <div class="modal-body">
                             <input v-model="review.id" type="hidden" />
                             <div class="form-group">
                                 <label for="inputReviewer">Reviewer</label>
-                                <select id="inputReviewer" class="form-control" v-model="review.reviewerId" required autofocus>
+                                <select :disabled="review.completed" id="inputReviewer" class="form-control" v-model="review.reviewerId" required autofocus>
                                     <option v-for="user in users" v-bind:value="user.id">{{user.fullName}}</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="inputReviewee">Reviewee</label>
-                                <select id="inputReviewee" class="form-control" v-model="review.revieweeId" required>
+                                <select :disabled="review.completed" id="inputReviewee" class="form-control" v-model="review.revieweeId" required>
                                     <option v-for="user in users" v-bind:value="user.id">{{user.fullName}}</option>
                                 </select>
+                            </div>
+                            <div v-if="review.completed">
+                                <ul>
+                                    <li v-for="card in review.cards">{{ card.title }}</li>
+                                </ul>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -75,7 +78,9 @@ export default {
             review: {
                 id: null,
                 reviewerId: null,
-                revieweeId: null
+                revieweeId: null,
+                completed: false,
+                cards: []
             }
         };
     },
@@ -93,6 +98,8 @@ export default {
             this.review.id = null;
             this.review.reviewerId = null;
             this.review.revieweeId = null;
+            this.review.completed = false;
+            this.review.cards = [];
             $('#createModal').modal('show');
         },
         createReview() {
@@ -151,6 +158,22 @@ export default {
                     this.$router.replace({ name: 'home' });
                 } else {
                     this.error = error;
+                }
+            });
+        },
+        loadReview(reviewId, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            this.reviews.forEach(review => {
+                if (review.id === reviewId) {
+                    this.review.id = review.id;
+                    this.review.reviewerId = review.reviewer.id;
+                    this.review.revieweeId = review.reviewee.id;
+                    this.review.completed = review.completed;
+                    this.review.cards = review.cards;
+                    $('#createModal').modal('show');
+                    return;
                 }
             });
         }
