@@ -16,12 +16,14 @@
                     <tr>
                         <th>Title</th>
                         <th>Category</th>
+                        <th>Epic</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="card in cards">
                         <td><a href="#" v-on:click="loadCard(card.id, $event)">{{card.title}}</a></td>
                         <td>{{card.category === 0 ? 'Positive' : 'Negative'}}</td>
+                        <td>{{card.epic.title}}</td>
                     </tr>
                 </tbody>
             </table>

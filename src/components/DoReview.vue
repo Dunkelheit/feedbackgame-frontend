@@ -97,9 +97,11 @@ export default {
 }
 .card-icon {
     width: 41px;
-    height: 41px;
-    margin: 0 auto 18px auto;
-    background-image: url('/static/img/thumbs-up.png');
+    height: 71px;
+    margin: 0 auto 18px;
+    background-image: url(/static/img/thumbs-up.png);
+    background-repeat: no-repeat;
+    background-position: 0 30px;
 }
 .card-icon span {
     display: none;
@@ -111,6 +113,7 @@ export default {
     text-align: center;
     padding-left: 10px;
     padding-right: 10px;
+    line-height: 20px;
 }
 .card-comment {
     display: block;
