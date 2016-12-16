@@ -20,24 +20,29 @@
                         <li class="email">{{ review.reviewee.email }}</li>
                     </ul>
                     <div class="button-container">
-                        <button class="btn btn-default" type="submit">Cancel</button>
-                        <button class="btn btn-success" type="submit">Send</button>
+                        <form>
+                            <input type="hidden" v-model="card1" />
+                            <input type="hidden" v-model="card2" />
+                            <input type="hidden" v-model="card3" />
+                            <button v-on:click="goBack" class="btn btn-default" type="submit">Cancel</button>
+                            <button v-on:click="submitForm" class="btn btn-success" type="submit">Send</button>
+                        </form>
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <div class="card-recipient positive"></div>
+                    <div data-container-id="1" class="card-recipient positive"></div>
                 </div>
                 <div class="col-md-2">
-                    <div class="card-recipient positive"></div>
+                    <div data-container-id="2" class="card-recipient positive"></div>
                 </div>
                 <div class="col-md-2">
-                    <div class="card-recipient negative"></div>
+                    <div data-container-id="3" class="card-recipient negative"></div>
                 </div>
             </div>
         </div>
         <div v-for="row in chunkedCards" class="row cards">
             <div v-for="card in row" class="col-md-2 cards-container">
-                <div :class="'noselect card ' + (card.category === 0 ? 'positive' : 'negative')">
+                <div :data-card-id="card.id" :class="'noselect card ' + (card.category === 0 ? 'positive' : 'negative')">
                     <div class="card-icon"><span>{{card.category === 0 ? 'Approve' : 'Improve'}}</span></div>
                     <p class="card-name">{{card.title}}</p>
                     <a class="card-comment" href="#"><span>Drop a comment</card></a>
@@ -55,6 +60,9 @@ export default {
     name: 'reviews',
     data() {
         return {
+            card1: null,
+            card2: null,
+            card3: null,
             loading: false,
             review: null,
             cards: [],
@@ -68,6 +76,30 @@ export default {
         '$route': 'fetchReviewAndCards'
     },
     methods: {
+        submitForm() {
+            axios.put('/api/reviews/' + this.$route.params.id, {
+                cards: [{
+                    id: parseInt(this.card1, 10)
+                }, {
+                    id: parseInt(this.card2, 10)
+                }, {
+                    id: parseInt(this.card3, 10)
+                }],
+                remark: 'Ewww! This guy smells like Cheeto\'s :('
+            }, {
+                headers: {
+                    'x-auth-token': this.$store.state.loggedIn
+                }
+            }).then(response => {
+                this.$router.replace({ name: 'myReviews' });
+            }).catch(error => {
+                console.log(error);
+                this.$router.replace({ name: 'myReviews' });
+            });
+        },
+        goBack() {
+            this.$router.replace({ name: 'myReviews' });
+        },
         fetchReviewAndCards() {
             this.error = null;
             this.review = null;
@@ -131,7 +163,8 @@ export default {
                 ondragleave: function (event) {
                     event.target.classList.remove('drop-active');
                 },
-                ondrop: function (event) {
+                ondrop: event => {
+                    this['card' + event.target.dataset.containerId] = event.relatedTarget.dataset.cardId;
                 }
             });
         }
