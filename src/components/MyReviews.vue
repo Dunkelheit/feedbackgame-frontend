@@ -31,6 +31,7 @@
 <script>
 import axios from 'axios';
 import {chunk} from 'lodash';
+
 export default {
     name: 'reviews',
     data () {

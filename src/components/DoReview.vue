@@ -10,9 +10,19 @@
             Please give feedback to your team member by dragging and dropping the cards into the placeholders<br />
             You can give it a comment by clicking the "i" on the card.
         </p>
+        <div v-if="review" class="recipient">
+            <div class="profile-container">
+                <div class="pica" v-bind:style="'background-image: url(/static/img/' + review.reviewee.avatar + ');'"><span>Pica of {{ review.reviewee.firstName }}</span></div>
+                <ul>
+                    <li class="full-name">{{ review.reviewee.fullName }}</li>
+                    <li class="job-title">{{ review.reviewee.jobTitle }}</li>
+                    <li class="email">{{ review.reviewee.email }}</li>
+                </ul>
+            </div>
+        </div>
         <div v-for="row in chunkedCards" class="row cards">
             <div v-for="card in row" class="col-md-2 cards-container">
-                <div class="card positive">
+                <div :class="'card ' + (card.category === 0 ? 'positive' : 'negative')">
                     <div class="card-icon"><span>{{card.category === 0 ? 'Approve' : 'Improve'}}</span></div>
                     <p class="card-name">{{card.title}}</p>
                     <a class="card-comment" href="#"><span>Drop a comment</card></a>
@@ -48,15 +58,29 @@ export default {
             this.review = null;
             this.cards = [];
             this.loading = true;
-            axios.get('/api/cards', {
-                headers: {
-                    'x-auth-token': this.$store.state.loggedIn
-                }
-            }).then(response => {
-                this.cards = response.data;
+
+            axios.all([
+                axios.get('/api/reviews/' + this.$route.params.id, {
+                    headers: {
+                        'x-auth-token': this.$store.state.loggedIn
+                    }
+                }),
+                axios.get('/api/cards', {
+                    headers: {
+                        'x-auth-token': this.$store.state.loggedIn
+                    }
+                })
+            ]).then(axios.spread((review, cards) => {
+                console.log(review.data);
+                this.review = review.data;
+                this.cards = cards.data;
                 this.loading = false;
-            }).catch(error => {
-                this.error = error;
+            })).catch(error => {
+                if (error.response.status === 401) {
+                    this.$router.replace({ name: 'home' });
+                } else {
+                    this.error = error;
+                }
             });
         }
     },
@@ -80,6 +104,28 @@ export default {
     box-shadow:         -4px 4px 0px 0px #393939;
     margin-bottom: 25px;
 }
+.recipient {
+    height: 243px;
+    background-color: #F3F3F3;
+    margin-bottom: 40px;
+}
+.recipient .profile-container {
+    padding-top: 20px;
+    margin-left: 20px;
+}
+.recipient .pica {
+    float: none;
+}
+.recipient .profile-container ul {
+    margin-top: 5px;
+    margin-left: 0;
+    padding-left: 0;
+}
+.caption {
+    font-size: 14px;
+    font-family: 'gotham-book';
+    margin-bottom: 25px;
+}
 .card p {
     color: #000000;
 }
@@ -89,19 +135,18 @@ export default {
 .negative {
     background-color: #ffe65d;
 }
-.caption {
-    font-size: 14px;
-    font-family: 'gotham-book';
-    margin-bottom: 25px;
-    margin-top: 25px;
-}
 .card-icon {
     width: 41px;
     height: 71px;
     margin: 0 auto 18px;
-    background-image: url(/static/img/thumbs-up.png);
     background-repeat: no-repeat;
     background-position: 0 30px;
+}
+.positive .card-icon {
+    background-image: url(/static/img/thumbs-up.png);
+}
+.negative .card-icon {
+    background-image: url(/static/img/helmet.png);
 }
 .card-icon span {
     display: none;
