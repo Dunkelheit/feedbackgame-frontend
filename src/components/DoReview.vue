@@ -37,7 +37,7 @@
         </div>
         <div v-for="row in chunkedCards" class="row cards">
             <div v-for="card in row" class="col-md-2 cards-container">
-                <div :class="'card ' + (card.category === 0 ? 'positive' : 'negative')">
+                <div :class="'noselect card ' + (card.category === 0 ? 'positive' : 'negative')">
                     <div class="card-icon"><span>{{card.category === 0 ? 'Approve' : 'Improve'}}</span></div>
                     <p class="card-name">{{card.title}}</p>
                     <a class="card-comment" href="#"><span>Drop a comment</card></a>
@@ -86,15 +86,52 @@ export default {
                     }
                 })
             ]).then(axios.spread((review, cards) => {
-                console.log(review.data);
                 this.review = review.data;
                 this.cards = cards.data;
                 this.loading = false;
+                this.loadInteract();
             })).catch(error => {
                 if (error.response.status === 401) {
                     this.$router.replace({ name: 'home' });
                 } else {
                     this.error = error;
+                }
+            });
+        },
+        loadInteract() {
+            interact('.card').draggable({
+                inertia: true,
+                autoScroll: true,
+                onmove: function (event) {
+                    var target = event.target;
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                    target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+                    target.setAttribute('data-x', x);
+                    target.setAttribute('data-y', y);
+                },
+                onstart: function (event) {
+                    event.target.classList.add('noshadow');
+                },
+                onend: function (event) {
+                    event.target.classList.remove('noshadow');
+                }
+            });
+
+            interact('.card-recipient').dropzone({
+                accept: '.card',
+                overlap: 0.75,
+                ondropactivate: function (event) {
+                },
+                ondropdeactivate: function (event) {
+                },
+                ondragenter: function (event) {
+                    event.target.classList.add('drop-active');
+                },
+                ondragleave: function (event) {
+                    event.target.classList.remove('drop-active');
+                },
+                ondrop: function (event) {
                 }
             });
         }
@@ -119,6 +156,12 @@ export default {
     box-shadow:         -4px 4px 0px 0px #393939;
     margin-bottom: 25px;
 }
+.noshadow {
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
 .recipient {
     height: 243px;
     background-color: #F3F3F3;
@@ -158,7 +201,9 @@ export default {
     background-color: #FEE19E;
     margin-left: 2px;
 }
-
+.drop-active {
+    background-color: #9ff1a7;
+}
 .card-recipient {
     width: 140px;
     height: 203px;
