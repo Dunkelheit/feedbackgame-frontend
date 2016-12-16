@@ -1,26 +1,46 @@
 <template>
-    <div class="row">
-        <div class="col-md-4 my-tasks">
-            <div class="page-header">
-                <h1>My Tasks</h1>
+    <div>
+        <div class="loading" v-if="loading">
+            Loading...
+        </div>
+        <div v-if="error" class="alert alert-danger" role="alert">
+            <strong>Oh snap!</strong> Something went wrong.
+        </div>
+        <div class="row">
+            <div class="col-md-4 my-tasks">
+                <div class="page-header">
+                    <h1>My Tasks</h1>
+                </div>
+                <div v-if="reviews.length > 0" class="content">
+                    <p class="caption">Please give feeback to your following team members:</p>
+                    <div v-for="row in chunkedReviews" class="row">
+                        <div v-for="review in row" class="col-sm-4 reviewee-container">
+                            <router-link :to="{ name: 'doReview', params: { id: review.id }}">
+                                <div class="pica" v-bind:style="'background-image: url(/static/img/' + review.reviewee.avatar + ');'">
+                                    <div class="yellow-shit"></div>
+                                    <span>Pica of {{ review.reviewee.firstName }}</span>
+                                </div>
+                                <p>{{review.reviewee.firstName}}<br />{{review.reviewee.surname}}</p>
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="loading" v-if="loading">
-                Loading...
-            </div>
-            <div v-if="error" class="alert alert-danger" role="alert">
-                <strong>Oh snap!</strong> Something went wrong.
-            </div>
-            <div v-if="reviews.length > 0" class="content">
-                <p class="caption">Please give feeback to your following team members:</p>
-                <div v-for="row in chunkedReviews" class="row">
-                    <div v-for="review in row" class="col-sm-4 reviewee-container">
-                        <router-link :to="{ name: 'doReview', params: { id: review.id }}">
+
+            <div v-if="doneReviews.length > 0" class="col-md-offset-1 col-md-4 my-tasks">
+                <div class="page-header">
+                    <h1>Finished Tasks</h1>
+                </div>
+                <div class="content">
+                    <p class="caption">Please give feeback to your following team members:</p>
+                    <div v-for="row in chunkedDoneReviews" class="row">
+                        <div v-for="review in row" class="col-sm-4 reviewee-container">
                             <div class="pica" v-bind:style="'background-image: url(/static/img/' + review.reviewee.avatar + ');'">
                                 <div class="yellow-shit"></div>
                                 <span>Pica of {{ review.reviewee.firstName }}</span>
                             </div>
                             <p>{{review.reviewee.firstName}}<br />{{review.reviewee.surname}}</p>
-                        </router-link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -38,6 +58,7 @@ export default {
         return {
             loading: false,
             reviews: [],
+            doneReviews: [],
             error: null
         };
     },
@@ -51,22 +72,39 @@ export default {
         fetchMyReviews() {
             this.error = null;
             this.reviews = [];
+            this.doneReviews = [];
             this.loading = true;
-            axios.get('/api/my/reviews', {
-                headers: {
-                    'x-auth-token': this.$store.state.loggedIn
-                }
-            }).then(response => {
-                this.reviews = response.data;
+
+            axios.all([
+                axios.get('/api/my/reviews?filter=open', {
+                    headers: {
+                        'x-auth-token': this.$store.state.loggedIn
+                    }
+                }),
+                axios.get('/api/my/reviews?filter=close', {
+                    headers: {
+                        'x-auth-token': this.$store.state.loggedIn
+                    }
+                })
+            ]).then(axios.spread((reviews, doneReviews) => {
+                this.reviews = reviews.data;
+                this.doneReviews = doneReviews.data;
                 this.loading = false;
-            }).catch(error => {
-                this.error = error;
+            })).catch(error => {
+                if (error.response.status === 401) {
+                    this.$router.replace({ name: 'home' });
+                } else {
+                    this.error = error;
+                }
             });
         }
     },
     computed: {
         chunkedReviews() {
             return chunk(this.reviews, 3);
+        },
+        chunkedDoneReviews() {
+            return chunk(this.doneReviews, 3);
         }
     }
 }
@@ -92,7 +130,7 @@ export default {
 .reviewee-container .pica {
     margin: 0 auto 8px auto;
 }
-.reviewee-container a {
+.reviewee-container {
     font-size: 14px;
     font-family: 'gotham-bold';
     color: #000000;
